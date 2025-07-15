@@ -18,9 +18,7 @@ const authorization = require('../middlewares/authorization.middleware');
 
 // Alising :-
 // ----------
-router
-  .route('/top-5-cheap')
-  .get(tourController.aliasTopTours, tourController.getAllTours);
+router.route('/top-5-cheap').get(tourController.getAllTours);
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -28,7 +26,13 @@ router
 // Stats (Aggrigation pipelines) :-
 // --------------------------------
 router.route('/tour-stats').get(tourController.getTourStats);
-router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
+router
+  .route('/monthly-plan/:year')
+  .get(
+    protectRoutes,
+    authorization('admin', 'lead-guide', 'guide'),
+    tourController.getMonthlyPlan
+  );
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -37,17 +41,62 @@ router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 // -------
 router
   .route('/')
-  .get(protectRoutes, tourController.getAllTours)
-  .post(tourController.createTour);
+  .get(tourController.getAllTours)
+  .post(protectRoutes, authorization('admin'), tourController.createTour);
 
 router
   .route('/:id')
   .get(tourController.getTourById)
-  .patch(tourController.updateTour)
+  .patch(
+    protectRoutes,
+    authorization('admin', 'lead-guide'),
+    tourController.updateTour
+  )
   .delete(
     protectRoutes,
     authorization('admin', 'lead-guide'),
     tourController.deleteTour
   );
+
+// #####################
+// ### Nested routes ###
+// #####################
+// The second way of dealing with reviews instead of normal direct reviews CRUD.
+// This is an alternative of sending the (tourID) inthe body.
+
+// (POST) => URL: /tour/:tourId/reviews
+// (GET) => URL: /tour/:tourId/reviews
+// (GeTOne & Update & Delete) => URL: /tour/:tourId/reviews/:reviewId
+
+// router
+//   .route('/:tourId/reviews')
+//   .get(
+//     protectRoutes,
+//     authorization('user'),
+//     reviewController.getAllUserReviews
+//   )
+//   .post(
+//     protectRoutes,
+//     authorization('user'),
+//     reviewController.createUserReview
+//   );
+
+// router
+//   .route('/:tourId/reviews/:reviewId')
+//   .get(
+//     protectRoutes,
+//     authorization('user'),
+//     reviewController.geUserReviewById
+//   )
+//   .patch(
+//     protectRoutes,
+//     authorization('user'),
+//     reviewController.updateUserReviewById
+//   )
+//   .delete(
+//     protectRoutes,
+//     authorization('user'),
+//     reviewController.deleteUserReviewById
+//   );
 
 module.exports = router;

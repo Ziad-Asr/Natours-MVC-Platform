@@ -3,6 +3,17 @@ const AppError = require('../utils/errorHandling/appError');
 const catchAsync = require('../utils/errorHandling/catchAsync');
 const allowedFields = require('../utils/allowedFields');
 
+exports.getMe = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req?.user?.id).select('-__v');
+  if (!user) return next(new AppError('User not found.', 404));
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+    },
+  });
+});
+
 exports.updateMe = catchAsync(async (req, res, next) => {
   const filteredBody = allowedFields(
     req.body,
@@ -12,7 +23,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     'active'
   );
 
-  const user = await User.findById(req?.user?.id);
+  const user = await User.findById(req?.user?.id).select('-__v');
   if (!user) return next(new AppError('User not found.', 404));
 
   const updatedUser = await User.findByIdAndUpdate(
@@ -46,7 +57,6 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
-// Soft delete (making user inactive & prevent returning inactive users or making any operations on them) {{{ Not used here }}}
 exports.softDeleteMe = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user?.id);
   if (!user) return next(new AppError('User not found.', 404));
@@ -56,3 +66,4 @@ exports.softDeleteMe = catchAsync(async (req, res, next) => {
 
   res.status(204).json({ status: 'success', data: null });
 });
+// Soft delete (making user inactive & prevent returning inactive users or making any operations on them) {{{ Not used here }}}

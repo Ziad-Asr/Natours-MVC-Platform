@@ -5,6 +5,10 @@
 
 // 2) Return array of errors (or) the first error only.
 
+// 3) Make reviews and other modules that deal with user id => Do not recieve the id from req, but extract it from the token + role
+//    Then do the needed security and authorization, (only make filter with user id {{{ for admins only }}}). (getAll) endpoint for admins.
+//    And make another getAll endpoint for users.
+
 // --------------------------------------------------------
 
 const express = require('express');

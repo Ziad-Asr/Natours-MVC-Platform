@@ -116,19 +116,14 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
-// ---------------------------------------------------
-// ---------------------------------------------------
-
-// Virtual property :-
-// --------------------
-// added afetr get data from the database
-// In Query (Tour.find({...})) I can't filter using this property because it's not part of the database.
-tourSchema.virtual('durationWeeks').get(function () {
-  return this.duration / 7;
-});
-
-// ---------------------------------------------------
-// ---------------------------------------------------
+tourSchema.index({ price: 1 });
+tourSchema.index({ slug: 1 });
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+// put additional indexes on the primery indexes (_id & name).
+// There are 3 new indexes in the DB (price - slug - price&ratingsAverage)
+// (1) => ascending & (-1) => descending
+// We choose the field to sort based on, because it's the most populer users search by or filter with.
+// ***** much better Performance *****
 
 // Mongoose middlewares :-
 // -----------------------
@@ -190,6 +185,32 @@ tourSchema.pre('aggregate', function (next) {
 });
 
 // ---------------------------------------------------
+// ########################
+// ### Virtual populate ###
+// ########################
+
+// We have 2 models (tours & reviews), each (review) has a reference on it's parent (tour), but each (tour) does't know it's reviews.
+// We didn't make an array of reviews IDs in each (tour) => bcause this will make it has large size after a while. (2 way referencing)
+// So to solve that problem to make when I find the tour to get it's reviews also. => ((( Virtual populate )))
+
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
+// Finally use this in the controller => {{{ .populate('reviews') }}}
+
+// ---------------------------------------------------
+// ########################
+// ### Virtual property ###
+// ########################
+
+// Added afetr get data from the database
+// In Query (Tour.find({...})) I can't filter using this property because it's not part of the database.
+tourSchema.virtual('durationWeeks').get(function () {
+  return this.duration / 7;
+});
+
 // ---------------------------------------------------
 
 const Tour = mongoose.model('Tour', tourSchema);
