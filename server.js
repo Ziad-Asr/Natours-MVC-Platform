@@ -9,6 +9,8 @@
 //    Then do the needed security and authorization, (only make filter with user id {{{ for admins only }}}). (getAll) endpoint for admins.
 //    And make another getAll endpoint for users.
 
+// 4) Refresh token & working with cookies only from backend.
+
 // --------------------------------------------------------
 
 const express = require('express');

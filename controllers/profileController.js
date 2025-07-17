@@ -15,13 +15,8 @@ exports.getMe = catchAsync(async (req, res, next) => {
 });
 
 exports.updateMe = catchAsync(async (req, res, next) => {
-  const filteredBody = allowedFields(
-    req.body,
-    'name',
-    'email',
-    'photo',
-    'active'
-  );
+  const filteredBody = allowedFields(req.body, 'name', 'email', 'active');
+  if (req.file) filteredBody.photo = req.file.filename; // Adding image name to the user.
 
   const user = await User.findById(req?.user?.id).select('-__v');
   if (!user) return next(new AppError('User not found.', 404));
